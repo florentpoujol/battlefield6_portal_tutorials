@@ -85,15 +85,48 @@ You can also add Icons to world objects.
 All functions to create UI elements have several signature with more or less arguments.
 See the `AddUI*` functions for the complete reference.
 
-Several argument are always presents:
-- the unique name of the widget
-- `position: Vector2` on screen (TODO where is the reference)
-- `size: Vector2` (TODO what is the unit ?)
-- `anchor: UIAnchor` where, relative the parent (or the screen) the element is placed (ie: TopLeft, Center)
-- `parent`: optional, another widget
-- `receiver`: optional and always at the end of the argument list if exists, this is the player or team to which show that widget
-- `visible: boolean`
-- `bg*` three argument to control the look of the background
+Several arguments are (almost) always presents:
+
+**name: string**
+This one is optional, and only needed when you need to later get the widget.  
+Also, while we can or must attach a layer to the widget, the best way to later get a particular widget for a particular player is to suffix the widget name with the player id (this is what AcePursuit does).
+
+```ts
+const playerId = mod.GetObjId(player);
+const name = `my_container_${playerId}`;
+const widget = mod.AddUIContainer();
+
+// later
+const widget: mod.UIWidget = mod.FindUIWidgetWithName(name);
+mod.SetUIWidgetVisible(widget, false); // hides the UI
+```
+
+**`position: Vector`**  
+The position **relative to the parent**, in pixels. Only the `x` and `y` from the vector are used.  
+The position of the (0,0) point on the widget itself relative to the parent depends on the anchor.
+
+**`size: Vector`**  
+The size in pixels. Only the `x` and `y` from the vector are used.
+Note that the size seems to be approximate, and may adapt to children ?
+
+**`anchor: UIAnchor`**  
+Where, relative the parent (or the screen), is the (0,0) position of the widget. (ie: TopLeft, Center)
+
+**`parent`**  
+Optional, another widget.
+
+**`receiver`**
+Optional and always at the end of the argument list if exists, this is the player or team to which show that widget.
+
+**`visible: boolean`**  
+Self explanatory. Hiding a parent will hide all children.  
+
+**`bg*`**
+Three arguments to control the look of the background.
+
+**`*Color: Vector`**  
+The colors are given in Red/Green/Blue as a (x, y, z) vector where each components is between 0.0 (0) and 1.0 (255).  
+So `Vector(1, 0, 0)` is full red, `Vector(0.5, 0.5, 1)` is violet.
 
 All parameters can be configured when the widget is created but all widget have setters to change any of theses values later.
 
@@ -124,12 +157,34 @@ The general images are fairly limmited, see the `UIImageType` enum.
 
 See function `AddUIImage`, `AddUIWeaponImage`, `AddUIGadgetImage`
 
+### Button interactions
+
+The method to create button do not include the traditional argument where you would give a callback function to be called on button click.
+
+After creating the button widget, you first need to **enable events** on them with the `mod.EnableUIButtonEvent(button: mod.UIWidget, event: mod.UIButtonEvent enabled: boolean);` function.  
+Events are button up/down, focus in/out (I do not know what focus means here), and hover in/out.
+
+Then you need to implement the following function, that is the single entrypoint for all button interactions.
+```ts
+OnPlayerUIButtonEvent(
+    eventPlayer: mod.Player,
+    eventUIWidget: mod.UIWidget,
+    eventUIButtonEvent: mod.UIButtonEvent
+): void 
+```
+In that method, you need to somehow determine what is the button that is being interacted with.  
+The better way seems to get the widget name with the `mod.GetUIWidgetName(eventUIWidget)` function.  
+You can check for the event with `mod.Equals(eventUIButtonEvent, mod.UIButtonEvent.FocusIn)` (a regular `==` should be OK since enum values are number ?).
+
+And finally you need to enable the player to interact with the UI with `mod.EnableUIInputMode(enabled: boolean, player: mod.Player)`.  
+After the player has done what it need, do not forget to disable the UI input mode, otherwise the players won't be able to play the game.
 
 ### Built-in message display
 
 The `mod.Message(msg, [args])` function allows to create a string message with up to three interpolations, with the `{}` syntax.
 
-Ie: `mod.Message("Player id: {}", mod.GetObjectId(player))` will build the message "Player id: 1" for instance.
+Ie: `mod.Message("Player id: {}", mod.GetObjectId(player))` will build the message "Player id: 1" for instance.  
+/!\ Important: see the **Stringkeys** paragraph below.
 
 ![The various kinds of messages](imgs/messages.jpg)
 
@@ -159,7 +214,8 @@ If the file content is:
 ```
 Then "Hello world!" can be built like that: `mod.stringkeys.key1 + ' ' + mode.stringkeys.key.key3`.
 
-TODO: Is this file really needed or optional ?
+Typically you will see scripts passing a value to `mod.Message()` from that `stringkeys` object (ie: `mod.Message(mod.stringkeys.key1)`).  
+**This is not actually required.** What is needed is that the string that you pass to `mod.Message()` exists as a value in the file.
 
 
 ## Object Ids
@@ -170,10 +226,15 @@ The number should be unique within its type/category, it is OK forinstance that 
 
 Then each type has a function to get the object, ie `mod.GetHQ(objectId): HQ`.
 
-From an object, use `mod.GetObjectId(object): number` to get the id back.
+From an object, use `mod.GetObjId(object): number` to get the id back.
 
 Dynamic objects that you do not place yourself, like teams, squad or even player also are considered objects and have an id that is sometimes needed to pass to other functions.
 Ie: `GetTeam()` accept as argument either a Player object, or a team id.
 
 
+## Built-in objects
 
+Through the API, you can interact with severals objects like `AreaTrigger`, `CapturePoint`, `EmplacementSpawner`, `HQ`, `InteractPoint`, `MCOM`, `Player`, `ScreenEffect`, `Sector`, `SFX`, `SpatialObject`, `Spawner`, `SpawnPoint`, `Team`, `Vehicle`, `VehicleSpawner`, `VFX`, `VO`, `WaypointPath`, `WorldIcon`.
+
+But these are not regular JS objects, they are opaque "symbols", that represents a built-in objects which internals have not been exposed.  
+So they do not have accessible properties, like player.name for instance, but you may get metadata through some functions like `mod.GetObjId(object): number`.
