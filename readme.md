@@ -58,7 +58,8 @@ The gizmo blue arrow show what will be the front of the vehicle.
 
 As of 12/10/2025, the SU57 doesn't spawn (it is also missing it's `VEH_` model).
 
-So far, I do not know how to have a UI where you select the vehicle from the deployment screen.
+So far, I do not know how to have a UI where you select the vehicle from the deployment screen.  
+See also the spawning vehicle from code below.
 
 
 ## Scripting
@@ -270,3 +271,44 @@ You can select the ico it will display and its color. The color must be set in R
 
 They also have parameters for a text, but even if the text match a key or a value present in the `string.json` file, it isn't visible.
 
+## AI Spawning via code
+
+To enable simple bots in your map, you do not need to do anything except in Portal to allow bots and configure them.
+
+But then you do not control theses bots via script.
+
+Instead you can add in the map objects of type `AI_Spawner` and give them a unique Object id.  
+In your script, you then need to first get the AI spawner with the `mod.GetSpawner(spawnerId)` with the id you gave it in the map.
+
+In the code the `Spawner` objects are AI spawners specifically, human and vehicle spawners are `PlayerSpawner` and `VehicleSpawner`.
+
+First, there is a few AI related global methods to control their behavior that you can call at the start of the game in the `OnGameModeStarted()` method, like (`mod.SetAIToHumanDamageModifier(0)`, which cause the AI to deal non damage at all to humans).
+
+Then you can force to spawn an AI (even if bot are diabled in the Portal rules) with the `mod.SpawnAIFromAISpawner()` functions.
+There is a few signatures possible, you always give the spawner as first argument, and then you can set any or all of the name, team, or class.  
+But this function do not return the spawned player, they are asyncronous while not even returning a promise.
+
+AI are considered in the code as Player, as much as humans, and they will go through the same life-cycle: first they "join" the game, then they are "deployed".  
+So the place to get the AI player object and do something with it is in the `OnPlayer*()` callbaks, like `OnPlayerJoined()` and `OnPlayerDeployed()`.  
+In these callbacks, you can distinguish between humans and AI with `mod.GetSoldierState(player, mod.SoldierStateBool.IsAISoldier): boolean` which return true if the player is an AI.  
+Once you have an ai player object, there is many configuration methods that you can call, that typically begins by "AI", like the ones to control their behavior or if they can shoot the player at all (with `mod.AIEnableShooting(ai, enable)`).
+
+I was not able however to make an ai follow a waypoint path.
+
+## Vehicle spawning in code
+
+See also the "Working with vehicles" section above to spawn vehicle without scripting.
+
+To spawn vehicles, you must add in the map the `VehicleSpawner` object and give it at least an object id.
+
+In the code get it with the `mod.GetVehicleSpawner(id)` function.  
+You can change the configuration set in the editor with the `mod.SetVehicleSpawner*()` functions, including the vehicle type.
+
+Then spawn the vehicle where the spawner is with the `mod.ForceVehicleSpawnerSpawn(spawner)` function.  
+Like for AIs, this function is asynchronous and the first time you will "receive" a vehicle object is in the `OnVehicleSpawned(vehicle)` callback (vehicle only spawns and get destroyed, they do not "join" and then "are deloyed" like for human and AI players).
+
+### Force a player (human or ai) into a vehicle
+
+Once you have a player and a vehicle object in the same piece of code, you can use the `mod.ForcePlayerToSeat(player, vehicle, seatNumber);` function.  
+
+The driver is always set number 0, the gunner (if any) is always 1, etc...
