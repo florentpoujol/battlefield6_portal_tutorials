@@ -1,5 +1,20 @@
 # Battlefield 6 Portal misc tutorials and tips
 
+## Table of Contents
+
+- [Youtube and other websites](#youtube-and-other-websites)
+- [In Godot](#in-godot)
+- [Test your creation](#test-your-creation)
+	- [Debug scripts](#debug-scripts)
+- [Working with vehicles](#working-wirh-vehicles)
+- [Scripting](#scripting)
+- [Creating UI](#creating-ui)
+- [Object Ids](#object-ids)
+- [DeployCam](#deploycam)
+- [WorldIcon](#worldicon)
+- [AI Spawning via code](#ai-spawning-via-code)
+- [Vehicle spawning in code](#vehicle-spawning-in-code)
+
 ## Youtube and other websites
 
 - there is a Portal channel on the official Battlefield Discord : https://discord.com/channels/140933721929940992/907670155125989456
@@ -34,12 +49,20 @@ After that you can configure the rest of the experience and then you just need t
 There is no need to publish it.
 
 After a few second, it will be available in the game in "Community > My experience".  
-If it doesn't appear, go back to the main menu, wait a few seconds, then try again.  
+If it doesn't appear, just save it again, go back to the main menu, wait a few seconds, then try again.  
 
-In the menu, select you experience, then at the botton select "Host localy". 
+In the menu, select you experience, then at the botton select "Host locally". 
 It will lanch the map with you modifications.
 
 The next times, you can just edit your experience, delete the spatial file from the map, then upload the new one, then save.
+
+### Debug scripts
+
+In the scripts you can use the standard `console.log()` function.
+It will output on your computer, in the file `C:\Users\{your username}\AppData\Local\Temp\Battlefieldâ„¢ 6\PortalLog.txt`.  
+Yes, the folder is named `Battlefieldâ„¢ 6` and not `Battlefield6`... `¯\_(ツ)_/¯`
+
+Also see the [Built-in message display](#built-in-message-display) section below for various way to display text on screen.
 
 
 ## Working with vehicles
@@ -64,7 +87,8 @@ See also the spawning vehicle from code below.
 
 ## Scripting
 
-The Portal experience builder allow to add scripts to your experiences.
+The Portal experience builder allow to add scripts to your experiences.  
+See the "debug script" section above that might come handy.
 
 The scripts are written in Typescript, and have access to a global `mod` object with all the Battlefield6 public API available on it.
 
