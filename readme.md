@@ -238,3 +238,35 @@ Through the API, you can interact with severals objects like `AreaTrigger`, `Cap
 
 But these are not regular JS objects, they are opaque "symbols", that represents a built-in objects which internals have not been exposed.  
 So they do not have accessible properties, like player.name for instance, but you may get metadata through some functions like `mod.GetObjId(object): number`.
+
+## DeployCam
+
+Deploy cams comes into play when you are on the deploy screen.
+
+It is both the top down view of the whole map, and the "vignette" that you have on the bottom right when you mouse over an objective, the HQ or a squad mate.
+
+**On HQ and Objective**
+
+To get the deploy cam on an objective or HQ, just parent a `DeployCam` object to the `HQ_PlayerSpawner` or `CapturePoint` object. No need to orient it, the parameters of the camera are the "Camera" properties on the parent object. By default they will just orbit
+
+**On the map itself**
+
+This is more nebulous, it only works half the time.
+
+You need to parent a `DeployCam` object to the top-level map object, position it at (0,0,0) (maybe change the height to be above the map, but how high doesn't seems to matter) and change its X orientation to be -90° so that it "looks down".
+
+It will work if the view of the map in the deploy screen is indeed top-down.
+
+Also the outlines of the combat area, or the HQ or objectives areas will not show up by default, I do not know how to do that.
+
+**On vehicle**
+
+This is not known. Parenting a DeployCam to a VehicleSpawner itself parented to the HQ isn't enough to create a vehicle spawn that you can select from the deploy screen, and you can link a VehicleSpawn to an HQ like you can do with InfantrySpawns.
+
+## WorldIcon
+
+These objects represents an icon that will be visible in 3D space where you place it on the map.
+You can select the ico it will display and its color. The color must be set in RGB, with values between 0 and 1 instead of 0 and 255.
+
+They also have parameters for a text, but even if the text match a key or a value present in the `string.json` file, it isn't visible.
+
