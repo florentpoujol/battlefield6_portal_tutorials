@@ -14,6 +14,9 @@
 - [WorldIcon](#worldicon)
 - [AI Spawning via code](#ai-spawning-via-code)
 - [Vehicle spawning in code](#vehicle-spawning-in-code)
+- [Setting up sectors, and capture points](#setting-up-sectors-and-capture-points)
+
+
 
 ## Youtube and other websites
 
@@ -336,3 +339,20 @@ Like for AIs, this function is asynchronous and the first time you will "receive
 Once you have a player and a vehicle object in the same piece of code, you can use the `mod.ForcePlayerToSeat(player, vehicle, seatNumber);` function.  
 
 The driver is always set number 0, the gunner (if any) is always 1, etc...
+
+
+## Setting up sectors, and capture points
+
+To have an area outlined on the deploy screen, you need to add a `Sector` object (in Godot), and give it a `PolygonVolume` object to the `Sector Area` property.  
+The outline will appear grey.
+
+Within the sector you can setup capture points and MCOMs.  
+Add a `CapturePoint` object, configure its `Initial team` property, and give it at least one `SpawnPoint` object in the `Infantry Spawn Points Team 1` property.  
+You can also give a `PolygonVolume` object to the `Capture area` property. The color of the capture area will depend on the team that owns the point.
+
+Under a circumstance I haven't been able to figure out, the sectors areas overrides and define the combat area, even if you have a `CombatArea` object in the scene.
+
+
+
+
+
